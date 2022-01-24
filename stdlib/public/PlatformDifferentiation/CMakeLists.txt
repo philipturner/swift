@@ -37,6 +37,7 @@ add_swift_target_library(swift_Glibc_Differentiation ${SWIFT_STDLIB_LIBRARY_BUIL
   SWIFT_MODULE_DEPENDS_OPENBSD Glibc _Differentiation
   SWIFT_MODULE_DEPENDS_CYGWIN Glibc _Differentiation
   SWIFT_MODULE_DEPENDS_HAIKU Glibc _Differentiation
+  SWIFT_MODULE_DEPENDS_ANDROID Glibc _Differentiation
 
   SWIFT_COMPILE_FLAGS
     ${SWIFT_STANDARD_LIBRARY_SWIFT_FLAGS}
