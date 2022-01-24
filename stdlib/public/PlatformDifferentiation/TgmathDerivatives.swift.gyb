@@ -16,14 +16,10 @@ import _Differentiation
 
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
   @_exported import Darwin.C.tgmath
-#elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(PS4) || os(Android) || os(Cygwin) || os(Haiku)
-<<<<<<< HEAD:stdlib/public/Differentiation/TgmathDerivatives.swift.gyb
-  import Glibc
-#elseif os(WASI)
-  import WASILibc
-=======
+#elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android) || os(Cygwin) || os(Haiku)
   @_exported import Glibc
->>>>>>> 74f11f84f36c8ef369dc9f0d09952150da95047d:stdlib/public/PlatformDifferentiation/TgmathDerivatives.swift.gyb
+#elseif os(WASI)
+  @_exported import WASILibc
 #elseif os(Windows)
   @_exported import CRT
 #else
