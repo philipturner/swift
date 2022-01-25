@@ -1,4 +1,4 @@
-// RUN: %target-run-simple-swiftgyb(-Xfrontend -enable-experimental-forward-mode-differentiation)
+// RUN: %target-run-simple-swiftgyb(-Xfrontend -enable-experimental-forward-mode-differentiation -Xfrontend -enable-cross-import-overlays)
 // REQUIRES: executable_test
 
 #if canImport(Darwin)
@@ -21,6 +21,9 @@ import StdlibUnittest
 import _Differentiation
 
 let DerivativeTests = TestSuite("TGMath")
+
+import _Darwin_Differentiation
+//assert(helloWorldFunc() == 2)
 
 func expectEqualWithTolerance<T>(_ expected: TestLiteralType, _ actual: T,
                                  ulps allowed: T = 3,

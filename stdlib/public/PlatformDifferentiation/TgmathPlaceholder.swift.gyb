@@ -1,45 +1,28 @@
-//===--- TgmathDerivatives.swift.gyb --------------------------*- swift -*-===//
-//
-// This source file is part of the Swift.org open source project
-//
-// Copyright (c) 2020 Apple Inc. and the Swift project authors
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://swift.org/LICENSE.txt for license information
-// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//
-//===----------------------------------------------------------------------===//
-// This file defines derivatives for tgmath functions.
-//===----------------------------------------------------------------------===//
-t
-t
-/*
-t
-import Swift
+import _Differentiation
 
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-  import Darwin.C.tgmath
-#elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(PS4) || os(Android) || os(Cygwin) || os(Haiku)
-  import Glibc
-#elseif os(WASI)
-  import WASILibc
+  @_exported import Darwin
+#elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android) || os(Cygwin) || os(Haiku)
+  @_exported import Glibc
+#else if os (WASI)
+  @_exported import WASILibc
 #elseif os(Windows)
-  import CRT
+  @_exported import CRT
 #else
 #error("Unsupported platform")
 #endif
-
-@usableFromInline
-@derivative(of: fma)
-func _jvpFma<T: FloatingPoint & Differentiable> (
-  _ x: T,
-  _ y: T,
-  _ z: T
+t
+@inlinablet
+@derivative(of: fma)t
+func _jvpFma<T: FloatingPoint & Differentiable> (t
+  _ x: T,t
+  _ y: T,t
+  _ z: Tt
 ) -> (value: T, differential: (T, T, T) -> T) where T == T.TangentVector {
   return (fma(x, y, z), { (dx, dy, dz) in dx * y + dy * x + dz })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: fma)
 func _vjpFma<T: FloatingPoint & Differentiable> (
   _ x: T,
@@ -49,7 +32,7 @@ func _vjpFma<T: FloatingPoint & Differentiable> (
   return (fma(x, y, z), { v in (v * y, v * x, v) })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: remainder)
 func _jvpRemainder<T: FloatingPoint & Differentiable> (
   _ x: T,
@@ -61,7 +44,7 @@ func _jvpRemainder<T: FloatingPoint & Differentiable> (
     """)
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: remainder)
 func _vjpRemainder<T: FloatingPoint & Differentiable> (
   _ x: T,
@@ -70,7 +53,7 @@ func _vjpRemainder<T: FloatingPoint & Differentiable> (
   return (remainder(x, y), { v in (v, -v * ((x / y).rounded(.toNearestOrEven))) })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: fmod)
 func _jvpFmod<T: FloatingPoint & Differentiable> (
   _ x: T,
@@ -82,7 +65,7 @@ func _jvpFmod<T: FloatingPoint & Differentiable> (
     """)
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: fmod)
 func _vjpFmod<T: FloatingPoint & Differentiable> (
   _ x: T,
@@ -93,7 +76,7 @@ func _vjpFmod<T: FloatingPoint & Differentiable> (
 
 %for derivative_kind in ['jvp', 'vjp']:
 %  linear_map_kind = 'differential' if derivative_kind == 'jvp' else 'pullback'
-@usableFromInline
+@inlinable
 @derivative(of: sqrt)
 func _${derivative_kind}Sqrt<T: FloatingPoint & Differentiable> (
   _ x: T
@@ -102,7 +85,7 @@ func _${derivative_kind}Sqrt<T: FloatingPoint & Differentiable> (
   return (value, { v in v / (2 * value) })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: ceil)
 func _${derivative_kind}Ceil<T: FloatingPoint & Differentiable> (
   _ x: T
@@ -110,7 +93,7 @@ func _${derivative_kind}Ceil<T: FloatingPoint & Differentiable> (
   return (ceil(x), { v in 0 })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: floor)
 func _${derivative_kind}Floor<T: FloatingPoint & Differentiable> (
   _ x: T
@@ -118,7 +101,7 @@ func _${derivative_kind}Floor<T: FloatingPoint & Differentiable> (
   return (floor(x), { v in 0 })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: round)
 func _${derivative_kind}Round<T: FloatingPoint & Differentiable> (
   _ x: T
@@ -126,7 +109,7 @@ func _${derivative_kind}Round<T: FloatingPoint & Differentiable> (
   return (round(x), { v in 0 })
 }
 
-@usableFromInline
+@inlinable
 @derivative(of: trunc)
 func _${derivative_kind}Trunc<T: FloatingPoint & Differentiable> (
   _ x: T
@@ -304,4 +287,3 @@ func _jvpPow(_ x: ${T}, _ y: ${T}) -> (value: ${T}, differential: (${T}, ${T}) -
 #endif
 %  end # if T == 'Float80':
 %end # for T in ['Float', 'Float80']:
-*/
