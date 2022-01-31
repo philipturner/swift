@@ -50,6 +50,13 @@ ${Availability(bits)}
 extension ${Self} {
 %for derivative_kind in ['vjp', 'jvp']:
 %  linear_map_kind = 'differential' if derivative_kind == 'jvp' else 'pullback'
+  // TODO: Add derivative of `init<Source>()` where Source: FloatingPoint
+  // TODO: Add derivative of `init(signOf:magnitudeOf:)`
+  // TODO: Add derivative of `sign`
+  // TODO: Add derivative of `magnitude`
+  // TODO: Add derivative of `round()`
+  // TODO: Add derivative of `rounded()`
+
   @inlinable
   @derivative(of: -)
   static func _${derivative_kind}Negate(
@@ -59,7 +66,7 @@ extension ${Self} {
   }
 
   @inlinable
-  @derivative(of: negate) // TODO: add test for this
+  @derivative(of: negate)
   mutating func _${derivative_kind}NegateAssign() -> (
     value: Void, ${linear_map_kind}: (inout Self) -> Void
   ) {
@@ -68,7 +75,7 @@ extension ${Self} {
   }
 
   @inlinable
-  @derivative(of: formSquareRoot) // TODO: add test for this
+  @derivative(of: formSquareRoot)
   mutating func _${derivative_kind}FormSquareRoot() -> (
     value: Void, ${linear_map_kind}: (inout Self) -> Void
   ) {
@@ -82,6 +89,11 @@ extension ${Self} {
 /// Derivatives of standard binary operators.
 ${Availability(bits)}
 extension ${Self} {
+  // TODO: Add derivative of `formRemainder(dividingBy:)`
+  // TODO: Add derivative of `formTruncatingRemainder(dividingBy:)`
+  // TODO: Add derivative of `remainder(dividingBy:)`
+  // TODO: Add derivative of `truncatingRemainder(dividingBy:)`
+
   @inlinable
   @derivative(of: +)
   static func _vjpAdd(
@@ -250,8 +262,10 @@ extension ${Self} {
 /// Derivatives of tertiary operators
 ${Availability(bits)}
 extension ${Self} {
+  // TODO(SR-15793) enable derivative of `addProduct` once bug is fixed
+  /*
   @inlinable
-  @derivative(of: addProduct) // TODO: add test for this
+  @derivative(of: addProduct)
   mutating func _vjpAddProduct(
     _ lhs: Self, 
     _ rhs: Self
@@ -261,16 +275,17 @@ extension ${Self} {
   }
 
   @inlinable
-  @derivative(of: addProduct) // TODO: add test for this
+  @derivative(of: addProduct) 
   mutating func _jvpAddProduct(
     _ lhs: Self, 
     _ rhs: Self
   ) -> (value: Void, differential: (inout Self, Self, Self) -> Void) {
     addProduct(lhs, rhs)
     return ((), { (dSelf, dlhs, drhs) in 
-      dSelf = dlhs * rhs + drhs * lhs + dSelf 
+      dSelf = dSelf + dlhs * rhs + drhs * lhs
     })
   }
+  */
 }
 
 % if bits == 80 or bits == 16:
@@ -284,7 +299,7 @@ where
   Self == Self.TangentVector
 {
   @inlinable
-  @derivative(of: addingProduct) // TODO: change test for this (it passed with incorrect pullback)
+  @derivative(of: addingProduct)
   func _vjpAddingProduct(
     _ lhs: Self, 
     _ rhs: Self
@@ -293,78 +308,60 @@ where
   }
 
   @inlinable
-  @derivative(of: addingProduct) // TODO: add test for this
+  @derivative(of: addingProduct)
   func _jvpAddingProduct(
     _ lhs: Self, 
     _ rhs: Self
   ) -> (value: Self, differential: (Self, Self, Self) -> Self) {
     return (addingProduct(lhs, rhs), { (dSelf, dlhs, drhs) in 
-      dlhs * rhs + drhs * lhs + dSelf 
+      dSelf + dlhs * rhs + drhs * lhs
     })
   }
 
+%for derivative_kind in ['vjp', 'jvp']:
+%  linear_map_kind = 'differential' if derivative_kind == 'jvp' else 'pullback'
   @inlinable
   @derivative(of: squareRoot)
-  func _vjpSquareRoot() -> (value: Self, pullback: (Self) -> Self) {
+  func _${derivative_kind}SquareRoot() -> (value: Self, ${linear_map_kind}: (Self) -> Self) {
     let value = squareRoot()
     return (value, { v in v / (2 * value) })
   }
+%end # for derivative_kind in ['jvp', 'vjp']:
 
+%for compare_op in ['minimum', 'maximum']:
+%  compare_symbol = '<=' if compare_op == 'minimum' else '>'
+%  compare_camel = 'Minimum' if compare_op == 'minimum' else 'Maximum' # to ensure camel case
+%  for suffix in ['', 'Magnitude']:
+%    magnitude_op = 'abs' if suffix == 'Magnitude' else ''
   @inlinable
-  @derivative(of: squareRoot) // TODO: add test for this
-  func _jvpSquareRoot() -> (value: Self, differential: (Self) -> Self) {
-    let value = squareRoot()
-    return (value, { dx in dx / (2 * value) })
-  }
-
-%for suffix in ['', 'Magnitude']:
-%  op = 'abs' if suffix == 'Magnitude' else ''
-  @inlinable
-  @derivative(of: minimum${suffix})
-  static func _vjpMinimum${suffix}(
+  @derivative(of: ${compare_op}${suffix})
+  static func _vjp${compare_camel}${suffix}(
     _ x: Self,
     _ y: Self
   ) -> ( // TODO: try using `Self` instead of `TangentVector` here
     value: Self, pullback: (Self) -> (Self, Self)
   ) {
-    if ${op}(x) <= ${op}(y) || y.isNaN { return (${op}(x), { v in (v, .zero) }) }
-    return (${op}(y), { v in (.zero, v) })
+    if ${magnitude_op}(x) ${compare_symbol} ${magnitude_op}(y) || y.isNaN { 
+      return (x, { v in (v, .zero) }) 
+    } else {
+      return (y, { v in (.zero, v) })
+    }
   }
 
   @inlinable
-  @derivative(of: minimum${suffix}) // TODO: add test for this
-  static func _jvpMinimum${suffix}(
+  @derivative(of: ${compare_op}${suffix})
+  static func _jvp${compare_camel}${suffix}(
     _ x: Self, 
     _ y: Self
   ) -> (
     value: Self, differential: (Self, Self) -> (Self)
   ) {
-    if ${op}(x) <= ${op}(y) || y.isNaN { return (${op}(x), { (dx, _) in dx }) }
-    return (${op}(y), { (_, dy) in dy })
+    if ${magnitude_op}(x) ${compare_symbol} ${magnitude_op}(y) || y.isNaN { 
+      return (x, { (dx, _) in dx }) 
+    } else {
+      return (y, { (_, dy) in dy })
+    }
   }
-
-  @inlinable
-  @derivative(of: maximum${suffix})
-  static func _vjpMaximum${suffix}(
-    _ x: Self, 
-    _ y: Self
-  ) -> (
-    value: Self, pullback: (Self) -> (Self, Self)
-  ) {
-    if ${op}(x) > ${op}(y) || y.isNaN { return (${op}(x), { v in (v, .zero) }) }
-    return (${op}(y), { v in (.zero, v) })
-  }
-
-  @inlinable
-  @derivative(of: maximum${suffix}) // TODO: add test for this
-  static func _jvpMaximum${suffix}(
-    _ x: Self, 
-    _ y: Self
-  ) -> (
-    value: Self, differential: (Self, Self) -> (Self)
-  ) {
-    if ${op}(x) > ${op}(y) || y.isNaN { return (${op}(x), { (dx, _) in dx }) }
-    return (${op}(y), { (_, dy) in dy })
-  }
-%end # for suffix in ['', 'Magnitude']:
+%  end # for suffix in ['', 'Magnitude']:
+%end # for compare_op in ['minimum', 'maximum']:
 }
