@@ -2948,6 +2948,7 @@ NeverNullType TypeResolver::resolveASTFunctionType(
     AnyFunctionType::Representation representation, bool noescape,
     bool concurrent, const clang::Type *parsedClangFunctionType,
     DifferentiabilityKind diffKind, Type globalActor) {
+
   Optional<llvm::SaveAndRestore<GenericParamList *>> saveGenericParams;
 
   if (auto *genericParams = repr->getGenericParams())
