@@ -523,13 +523,11 @@ bool TypeChecker::isDifferentiable(Type type, bool tangentVectorEqualsSelf,
     type = dc->mapTypeIntoContext(type);
   auto tanSpace = type->getAutoDiffTangentSpace(
       LookUpConformanceInModule(dc->getParentModule()));
-  if (!tanSpace) {
+  if (!tanSpace)
     return false;
-  }
   // If no `Self == Self.TangentVector` requirement, return true.
-  if (!tangentVectorEqualsSelf) {
+  if (!tangentVectorEqualsSelf)
     return true;
-  }
   // Otherwise, return true if `Self == Self.TangentVector`.
   return type->getCanonicalType() == tanSpace->getCanonicalType();
 }
