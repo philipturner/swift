@@ -3,11 +3,11 @@
 Visual Studio 2019 or newer is needed to build the Swift SDK for Android on
 Windows.
 
-## Install Dependencies
+1. Install Dependencies
 - Install the latest version of [Visual Studio](https://www.visualstudio.com/downloads/)
 - Make sure to include the android NDK in your installation.
 
-## Clone the repositories
+1. Clone the repositories
 1. Configure git to work with Unix file endings
 1. Clone `apple/swift-llvm` into a directory named `llvm`
 1. Clone `apple/swift-corelibs-libdispatch` into a directory named `swift-corelibs-libdispatch`
