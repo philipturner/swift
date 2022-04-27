@@ -3,8 +3,8 @@
 // SR-15793: In the original reproducer, it swizzled the components of a
 // gradient with multiple return values when there was mutating function inside
 // of an encapsulating differentiable function. Changing the gradient types from
-// all `Float` to one being `Double` caused the compiler to crash, exposing that
-// the derivatives were being processed incorrectly during SILGen.
+// all `Double` to some `Float` and some `Double` caused the compiler to crash, 
+// exposing that the derivatives were being processed incorrectly during SILGen.
 
 import _Differentiation
 
