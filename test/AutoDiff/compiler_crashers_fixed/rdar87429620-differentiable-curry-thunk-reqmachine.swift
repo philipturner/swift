@@ -1,5 +1,4 @@
 // RUN: %target-swift-frontend -emit-sil -verify %s
-// XFAIL: *
 
 // rdar://87429620 (Differentiable curry thunk RequirementMachine error)
 

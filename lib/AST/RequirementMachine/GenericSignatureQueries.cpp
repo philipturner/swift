@@ -447,7 +447,7 @@ Type RequirementMachine::getCanonicalTypeInContext(
       dump(llvm::errs());
       abort();
     }
-
+    
     // Compute the type of the unresolved suffix term V.
     auto substType = substPrefixType(t, term.size() - prefix.size(),
                                      prefixType, Sig);

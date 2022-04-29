@@ -548,11 +548,15 @@ static CanSILFunctionType getAutoDiffDifferentialType(
     auto paramTanType = getAutoDiffTangentTypeForLinearMap(
         param.getInterfaceType(), lookupConformance,
         substGenericParams, substReplacements, ctx);
+    auto altParamTanType = param.getInterfaceType()
+        ->getAutoDiffTangentSpace(lookupConformance)
+        ->getCanonicalType();
+    llvm::outs() << "param (1):\n";
+    paramTanType.dump();
+    altParamTanType.dump();
     auto paramConv = getTangentParameterConvention(
         // FIXME(rdar://82549134): Use `resultTanType` to compute it instead.
-        param.getInterfaceType()
-            ->getAutoDiffTangentSpace(lookupConformance)
-            ->getCanonicalType(),
+        altParamTanType,
         param.getConvention());
     differentialParams.push_back({paramTanType, paramConv});
   }
@@ -564,11 +568,15 @@ static CanSILFunctionType getAutoDiffDifferentialType(
       auto resultTanType = getAutoDiffTangentTypeForLinearMap(
           result.getInterfaceType(), lookupConformance,
           substGenericParams, substReplacements, ctx);
+      auto altResultTanType = result.getInterfaceType()
+          ->getAutoDiffTangentSpace(lookupConformance)
+          ->getCanonicalType();
+      llvm::outs() << "result (2):\n";
+      resultTanType.dump();
+      altResultTanType.dump();
       auto resultConv = getTangentResultConvention(
           // FIXME(rdar://82549134): Use `resultTanType` to compute it instead.
-          result.getInterfaceType()
-              ->getAutoDiffTangentSpace(lookupConformance)
-              ->getCanonicalType(),
+          altResultTanType,
           result.getConvention());
       differentialResults.push_back({resultTanType, resultConv});
       continue;
@@ -699,11 +707,15 @@ static CanSILFunctionType getAutoDiffPullbackType(
       auto resultTanType = getAutoDiffTangentTypeForLinearMap(
           origRes.getInterfaceType(), lookupConformance,
           substGenericParams, substReplacements, ctx);
+      auto altResultTanType = origRes.getInterfaceType()
+          ->getAutoDiffTangentSpace(lookupConformance)
+          ->getCanonicalType();
+      llvm::outs() << "result (3):\n";
+      resultTanType.dump();
+      altResultTanType.dump();
       auto paramConv = getTangentParameterConventionForOriginalResult(
           // FIXME(rdar://82549134): Use `resultTanType` to compute it instead.
-          origRes.getInterfaceType()
-              ->getAutoDiffTangentSpace(lookupConformance)
-              ->getCanonicalType(),
+          altResultTanType,
           origRes.getConvention());
       pullbackParams.push_back({resultTanType, paramConv});
       continue;
@@ -741,11 +753,15 @@ static CanSILFunctionType getAutoDiffPullbackType(
     auto paramTanType = getAutoDiffTangentTypeForLinearMap(
         param.getInterfaceType(), lookupConformance,
         substGenericParams, substReplacements, ctx);
+    auto altParamTanType = param.getInterfaceType()
+        ->getAutoDiffTangentSpace(lookupConformance)
+        ->getCanonicalType();
+    llvm::outs() << "param (4):\n";
+    paramTanType.dump();
+    altParamTanType.dump();
     auto resultTanConvention = getTangentResultConventionForOriginalParameter(
         // FIXME(rdar://82549134): Use `resultTanType` to compute it instead.
-        param.getInterfaceType()
-            ->getAutoDiffTangentSpace(lookupConformance)
-            ->getCanonicalType(),
+        altParamTanType,
         param.getConvention());
     pullbackResults.push_back({paramTanType, resultTanConvention});
   }
